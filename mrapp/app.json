@@ -47,7 +47,11 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
