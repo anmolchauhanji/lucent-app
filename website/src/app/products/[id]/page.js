@@ -19,6 +19,131 @@ import { showToast } from "@/utils/toast";
 
 const isMongoId = (s) => typeof s === "string" && /^[a-f0-9]{24}$/i.test(s);
 
+// ─── Medical Description Parser & Card ────────────────────────────────────────
+function parseMedicalDescription(raw) {
+  if (!raw) return [];
+
+  // Strip HTML tags but preserve newlines for formatting
+  const text = raw
+    .replace(/<br\s*\/?>/gi, "\n")          // <br> → newline
+    .replace(/<\/p>/gi, "\n")               // </p> → newline
+    .replace(/<[^>]+>/g, "")                // strip remaining tags
+    .replace(/&nbsp;/gi, " ")              // decode nbsp
+    .replace(/&amp;/gi, "&")
+    .trim();
+
+  // Flat version (single-line) for pattern matching
+  const flat = text.replace(/\s+/g, " ").trim();
+
+  const fields = [];
+
+  // Helpers (work on flat single-line text)
+  const extract = (pattern) => {
+    const m = flat.match(pattern);
+    return m ? m[1].trim() : null;
+  };
+
+  // Composition / Each tablet contains
+  // Try to grab the multiline block from original text first
+  const compMatchRaw = text.match(/Each\s+(?:film\s+coated\s+)?tablet\s+contains\s*[:\-]?([\s\S]*?)(?=Colour|Dosage|Store|NOTE|$)/i);
+  const compMatchFlat = flat.match(/Each\s+(?:film\s+coated\s+)?tablet\s+contains\s*[:\-]?(.*?)(?=Colour|Dosage|Store|NOTE|$)/i);
+  if (compMatchRaw) {
+    // Keep original whitespace/newlines so the format is preserved
+    fields.push({ label: "Composition", value: compMatchRaw[1].trim(), icon: "💊", accent: "teal", preformatted: true });
+  } else if (compMatchFlat) {
+    fields.push({ label: "Composition", value: compMatchFlat[1].trim(), icon: "💊", accent: "teal", preformatted: true });
+  }
+
+  // Colour
+  const colour = extract(/Colour\s*[:\-]\s*([^.]+?)(?=Dosage|Store|NOTE|$)/i);
+  if (colour) fields.push({ label: "Colour", value: colour, icon: "🎨", accent: "indigo" });
+
+  // Dosage
+  const dosage = extract(/Dosage\s*[:\-]\s*([^.]+\.)/i);
+  if (dosage) fields.push({ label: "Dosage", value: dosage, icon: "📋", accent: "blue" });
+
+  // Storage
+  const storage = extract(/Store\s+at\s+([^.]+\.)/i);
+  if (storage) fields.push({ label: "Storage", value: "Store at " + storage, icon: "🌡️", accent: "amber" });
+
+  // Light & moisture
+  if (/Protected from light/i.test(flat))
+    fields.push({ label: "Protection", value: "Protected from light & moisture. Keep all medicine out of reach of children.", icon: "⚠️", accent: "orange" });
+
+  // MRP / expiry note
+  const note = extract(/NOTE\s*[:\-]\s*(.+)/i);
+  if (note) fields.push({ label: "NOTE", value: note, icon: "ℹ️", accent: "red" });
+
+  // Fallback: if nothing parsed, just show original text
+  if (fields.length === 0) {
+    fields.push({ label: "Description", value: text, icon: "📄", accent: "gray", preformatted: true });
+  }
+
+  return fields;
+}
+
+const ACCENT_STYLES = {
+  teal: { wrap: "bg-teal-50 border-teal-200", label: "text-teal-700", icon: "bg-teal-100 text-teal-600" },
+  blue: { wrap: "bg-blue-50 border-blue-200", label: "text-blue-700", icon: "bg-blue-100 text-blue-600" },
+  indigo: { wrap: "bg-indigo-50 border-indigo-200", label: "text-indigo-700", icon: "bg-indigo-100 text-indigo-600" },
+  amber: { wrap: "bg-amber-50 border-amber-200", label: "text-amber-700", icon: "bg-amber-100 text-amber-600" },
+  orange: { wrap: "bg-orange-50 border-orange-200", label: "text-orange-700", icon: "bg-orange-100 text-orange-600" },
+  red: { wrap: "bg-red-50 border-red-200", label: "text-red-700", icon: "bg-red-100 text-red-600" },
+  gray: { wrap: "bg-gray-50 border-gray-200", label: "text-gray-700", icon: "bg-gray-100 text-gray-600" },
+};
+
+function MedicalDescriptionCard({ description }) {
+  const fields = parseMedicalDescription(description);
+  return (
+    <div className="pt-6 border-t border-gray-100 space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <span className="text-lg">🧬</span>
+        <h3 className="font-extrabold text-gray-900 uppercase text-xs tracking-widest">
+          Medical Description
+        </h3>
+        <span className="ml-auto text-[10px] bg-teal-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+          Rx Info
+        </span>
+      </div>
+
+      {/* Field Cards */}
+      <div className="space-y-2">
+        {fields.map((f, i) => {
+          const st = ACCENT_STYLES[f.accent] || ACCENT_STYLES.gray;
+          return (
+            <div
+              key={i}
+              className={`flex gap-3 items-start rounded-2xl border p-3 ${st.wrap}`}
+            >
+              <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-base ${st.icon}`}>
+                {f.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-extrabold uppercase tracking-widest mb-0.5 ${st.label}`}>
+                  {f.label}
+                </p>
+                <p
+                  className="text-gray-700 text-sm leading-relaxed font-medium"
+                  style={f.preformatted ? { whiteSpace: "pre-line" } : undefined}
+                >
+                  {f.value}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer disclaimer */}
+      <p className="text-[10px] text-gray-400 italic leading-relaxed pt-1">
+        * This information is for reference only. Always consult a licensed physician or pharmacist before use.
+      </p>
+    </div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -296,28 +421,25 @@ export default function ProductDetailPage() {
             </div>
 
             {product.description && (
-              <div className="space-y-3 pt-6 border-t border-gray-100">
-                <h3 className="font-bold text-gray-900 uppercase text-xs tracking-widest">Medical Description</h3>
-                <p className="text-gray-600 leading-relaxed text-sm text-justify">{product.description}</p>
-              </div>
+              <MedicalDescriptionCard description={product.description} />
             )}
           </div>
         </div>
 
-          {/* Similar Products Section */}
-          {similarProduct.length > 0 && (
-            <section className="mt-16 relative">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Similar Products</h2>
-                {(product.categoryName || product.category) && (
-                  <Link
-                    href={`/categories/${getCategorySlug(product.categoryName || product.category)}`}
-                    className="text-teal-600 hover:text-teal-700 font-semibold text-sm"
-                  >
-                    View All →
-                  </Link>
-                )}
-              </div>
+        {/* Similar Products Section */}
+        {similarProduct.length > 0 && (
+          <section className="mt-16 relative">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Similar Products</h2>
+              {(product.categoryName || product.category) && (
+                <Link
+                  href={`/categories/${getCategorySlug(product.categoryName || product.category)}`}
+                  className="text-teal-600 hover:text-teal-700 font-semibold text-sm"
+                >
+                  View All →
+                </Link>
+              )}
+            </div>
 
             <div
               ref={similarScrollRef}

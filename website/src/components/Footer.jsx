@@ -9,7 +9,7 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="relative bg-gradient-to-br from-teal-900 via-teal-800 to-teal-950 text-white overflow-hidden">
+       <footer className="relative bg-gradient-to-br from-teal-50 via-white to-teal-100 text-gray-800 overflow-hidden">
 
             {/* Background Decorative Elements (Optional glow effects) */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />

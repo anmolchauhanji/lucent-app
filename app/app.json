@@ -4,7 +4,7 @@
     "slug": "kuremedi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "kuremedi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,9 +17,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/icon.png",
-        "monochromeImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundImage": "./assets/images/logo.png",
+        "monochromeImage": "./assets/images/logo.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.digimese.kuremedi",
@@ -34,7 +34,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.png",
+          "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -56,10 +56,10 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "owner": "babloo123",
+    "owner": "shagun402",
     "extra": {
       "eas": {
-        "projectId": "32353b1a-20d4-4355-a98c-d48dc29c01cd"
+        "projectId": "553b7ef5-bca1-4a31-a5a2-7bf05d43406d"
       }
     }
   }

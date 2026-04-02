@@ -4,7 +4,7 @@
     "slug": "mrapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/favicon-48.png",
     "scheme": "mrapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

@@ -148,7 +148,6 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // Single batched load: products, categories, brands in parallel to avoid multiple paints and slow API
   useEffect(() => {
     setLoadingHome(true);
     Promise.all([getProducts(), getCategories(), getBrands()])
@@ -214,7 +213,6 @@ export default function Home() {
               className="mr-3 bg-white rounded-2xl p-2 border border-gray-200"
               style={{ width: CARD_WIDTH }}
             >
-              {/* image */}
               <View className="relative">
                 <Pressable onPress={() => router.push(`/product/${item._id}`)}>
                   <Image
@@ -224,7 +222,6 @@ export default function Home() {
                   />
                 </Pressable>
 
-                {/* ❤️ wishlist */}
                 <Pressable
                   onPress={() =>
                     toggleWishlist({
@@ -244,7 +241,6 @@ export default function Home() {
                   />
                 </Pressable>
 
-                {/* add / qty pill */}
                 {(item.stockQuantity ?? 1) <= 0 ? (
                   <View className="absolute bottom-2 right-2 bg-gray-400 px-3 py-1 rounded-lg">
                     <Text className="text-white text-xs font-bold">Out</Text>
@@ -335,14 +331,8 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-[#f8faf8]" style={{ paddingTop: insets.top }}>
-      {/* Header logo */}
-      <View className="px-4 pt-2 pb-2 bg-white">
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={{ width: 140, height: 28 }}
-          resizeMode="contain"
-        />
-      </View>
+      {/* ✅ Header logo REMOVED */}
+
       {/* Search - tap to open dedicated search screen */}
       <Pressable
         onPress={() => router.push("/search")}
@@ -389,7 +379,7 @@ export default function Home() {
           </>
         ) : (
           <>
-        {/* Banner slider - auto slide every 2 sec */}
+        {/* Banner slider */}
         <View className="mt-4 mx-5 rounded-2xl overflow-hidden">
           <ScrollView
             ref={bannerScrollRef}
